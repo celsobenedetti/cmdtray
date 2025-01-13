@@ -5,3 +5,6 @@ build:
 
 run: build
 	~/.local/bin/cmdtray
+
+kill:
+	pgrep cmdtray | xargs kill

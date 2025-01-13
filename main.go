@@ -2,12 +2,19 @@ package main
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"os/exec"
 	"strings"
 	"time"
 
 	systray "github.com/getlantern/systray"
+)
+
+const (
+	TMP_FILE        = "/tmp/wakatime"
+	UPDATE_INTERVAL = 8 * time.Minute
+	ICON_PATH       = "/home/celso/projects/cmdtray/icons/favicon.ico"
 )
 
 func main() {
@@ -19,7 +26,7 @@ func onReady() {
 	quitButton := systray.AddMenuItem("Quit", "quit")
 
 	runCommandAndUpdate()
-	ticker := time.NewTicker(2 * time.Minute)
+	ticker := time.NewTicker(UPDATE_INTERVAL)
 
 	for {
 		select {
@@ -36,17 +43,30 @@ func runCommandAndUpdate() {
 
 	res, err := cmd.Output()
 	if err != nil {
-		fmt.Println("Error running command", err.Error())
+		slog.Error("Error running command", "err", err.Error())
 		return
 	}
 
+	out := string(res)
+	slog.Info("Wakatime:", "out", out)
+	writeFile(out)
+
 	systray.SetTitle(
-		strings.TrimSpace(string(res)),
+		strings.TrimSpace(out),
 	)
 }
 
+func writeFile(s string) {
+	err := os.WriteFile(TMP_FILE, []byte(s), 0777)
+	if err != nil {
+		slog.Error("Error writing file", "err", err.Error())
+		return
+	}
+	slog.Info("Written to file", "file", TMP_FILE)
+}
+
 func readIcon() {
-	buf, err := os.ReadFile("/home/celso/projects/cmdtray/icons/favicon.ico")
+	buf, err := os.ReadFile(ICON_PATH)
 	if err != nil {
 		fmt.Println("err", err.Error())
 		return
