@@ -13,7 +13,7 @@ import (
 
 const (
 	TMP_FILE        = "/tmp/wakatime"
-	UPDATE_INTERVAL = 8 * time.Minute
+	UPDATE_INTERVAL = 15 * time.Minute
 	ICON_PATH       = "/home/celso/projects/cmdtray/icons/favicon.ico"
 )
 
